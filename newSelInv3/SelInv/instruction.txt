@@ -1,0 +1,7 @@
+cd SelInv/LIB
+make clean 
+make
+cd ../SelInv/EXAMPLES
+make clean
+make julia
+
