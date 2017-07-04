@@ -77,7 +77,7 @@ int selinv2julia(int nnodes, int nnz,
     double *LNZXX, *LDL_L;
     int *RowXX,*ColXX;
     double *V;
-
+    int dumpL=1;
 
     RowXX =(int *) malloc(Lnnz*sizeof(int));
     ColXX =(int *) malloc(Lnnz*sizeof(int));
