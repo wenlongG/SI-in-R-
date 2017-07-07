@@ -1,6 +1,5 @@
 library(SparseM)
 
-getTestMatrix = function(){
     B = diag(1,8)
     B[2,1] = 1
     B[1,2] = 1
@@ -17,8 +16,5 @@ getTestMatrix = function(){
     nzvals = testM@ra
     nnz = length(nzvals)
     nnodes = nrow(testM)
-}
 
-
-
-dyn.load("sourceCpp_4.so")
+selinv2julia(nnodes, nnz, colptr, rowind, nzvals)

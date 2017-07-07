@@ -3,7 +3,7 @@
 
    Version:        0.1
    Last modified:  October 27, 2009
-   Authors:        
+   Authors:
      Chao Yang,
      Computer Research Division, Lawrence Berkeley National Lab
      Lin Lin,
@@ -71,13 +71,13 @@ typedef struct Anode {
 Anode_type mat[maxm];
 int        cachsz=512;
 int        nunroll=4;
-int        fullrep = FALSE; 
+int        fullrep = FALSE;
 
 /* -----------------------
      Function prototypes
    ----------------------- */
 void ldlt_preprocess__(int* token,  int *n,    int *colptr,
-                       int* rowind, int *Lnnz, int *order, 
+                       int* rowind, int *Lnnz, int *order,
                        int *perm);
 
 void ldlt_fact__(int *token, int *colptr, int *rowind, double *nzvals,int *);
@@ -93,17 +93,17 @@ void ldlt_diaginv__(int *token, double *dinv);
 
 void ldlt_free__(int *token);
 
-extern void ilo2ho_(int *n,    int *nnza, int *colptr, int *rowind, 
+extern void ilo2ho_(int *n,    int *nnza, int *colptr, int *rowind,
                     int *xadj, int *adj,  int *iwork);
 
 extern void flo2ho_(int *n,          int *colptr, int *rowind,
                     double *nzvals,  int *xadj,   int *adj,
                     double *anz,     int *iwork);
 
-extern void ordmmd_(int *logfil, int *n,      int *xlindx, int *lindx, 
+extern void ordmmd_(int *logfil, int *n,      int *xlindx, int *lindx,
                     int *invp,   int *perm,   int *iwmax,  int *iwork,
                     int *nnzl,   int *nsub,   int *colcnt, int *nsuper,
-                    int *xsuper, int *snodes, int *sfiflg, int *iflag); 
+                    int *xsuper, int *snodes, int *sfiflg, int *iflag);
 
 extern void symfct_(int *logfil, int *n,      int *nnza,   int *xadj,
                     int *adj,    int *perm,   int *invp,   int *colcnt,
@@ -120,7 +120,7 @@ extern void METIS_NodeND(int *n,       int *xadj, int *adj, int *numflag,
 #endif
 
 /*------------------
-      Functions 
+      Functions
   ------------------*/
 void ldlt_preprocess__(int *token, int *n,    int *colptr,
                        int *rowind, int *Lnnz, int *order,
@@ -128,7 +128,7 @@ void ldlt_preprocess__(int *token, int *n,    int *colptr,
 {
     int  numflag, options[8];
     int  nnz,     nnza,  neqns,  nsub,    ibegin, iend,
-           i,        j,  nnzl,   Lnsub,   nsuper, iwsiz, 
+           i,        j,  nnzl,   Lnsub,   nsuper, iwsiz,
          clnz,    snsz,  tmpsze, tmpsiz,  maxlen, maxsup,
          rnnz,    ierr,  jglb,   iflag,   sfiflg, logfil=6;
     int  *adj2, *xadj2;
@@ -194,13 +194,13 @@ void ldlt_preprocess__(int *token, int *n,    int *colptr,
 
        /* adj, xadj contain the structure of the
           full representation of the original matrix */
-       
+
        mat[*token].xadj = (int*) malloc((neqns+1)*sizeof(int));
        if (!mat[*token].xadj) {
-          fprintf(stderr, 
+          fprintf(stderr,
                   "ldlt_preprocess: memory allocation failed for xadj\n");
           exit(1);
-       } 
+       }
 
        mat[*token].adj = (int*) malloc((nnza+neqns)*sizeof(int));
        if (!mat[*token].adj) {
@@ -228,23 +228,23 @@ void ldlt_preprocess__(int *token, int *n,    int *colptr,
        }
 
        /* ----------------------------------------------------------
-          convert the indices and pointers of the lower triangular 
-          representation of a symmetric HB matrix to its full 
-          representation. 
+          convert the indices and pointers of the lower triangular
+          representation of a symmetric HB matrix to its full
+          representation.
           ---------------------------------------------------------- */
 
        mat[*token].iwork = (int*) malloc(iwsiz*sizeof(int));
-       if (!mat[*token].iwork) { 
+       if (!mat[*token].iwork) {
           fprintf(stderr, "ldlt_preprocess: Fail to allocate iwork\n");
           exit(1);
        }
 
        if (fullrep) {
-          /* make a copy of the non-zero structure, take out the 
+          /* make a copy of the non-zero structure, take out the
              diagonals */
           mat[*token].xadj[0] = 1;
           for (i=0;i<neqns;i++) {
-             mat[*token].xadj[i+1] = mat[*token].xadj[i] 
+             mat[*token].xadj[i+1] = mat[*token].xadj[i]
                                    + (colptr[i+1] - colptr[i] - 1);
           }
           if (mat[*token].xadj[neqns]-1 != nnza) {
@@ -263,36 +263,36 @@ void ldlt_preprocess__(int *token, int *n,    int *colptr,
              }
           }
        }
-       else { 
+       else {
           /* convert */
           ilo2ho_(n,                 &nnza,            colptr,
                   rowind,            mat[*token].xadj, mat[*token].adj,
                   mat[*token].iwork);
-       } 
+       }
 
-/* DEBUG */    
+/* DEBUG */
        /* printf(" preprocess: adj[nnz-1] = %d\n",
 	  mat[*token].adj[nnz-1]); */
- 
+
        /* -------------------------------------------------
-          Make a copy of the convertd matrix for reordering 
+          Make a copy of the convertd matrix for reordering
           ------------------------------------------------- */
-       
+
        for (i=0;i<=neqns;i++)   xadj2[i] = mat[*token].xadj[i];
        for (i=0;i<nnza;i++)     adj2[i]  = mat[*token].adj[i];
 
        /* ----------------------------------------
-          Allocate storage for supernode partition 
+          Allocate storage for supernode partition
           ----------------------------------------*/
 
        mat[*token].snodes = (int*)malloc(neqns*sizeof(int));
        if (!mat[*token].snodes) {
-          fprintf(stderr, 
+          fprintf(stderr,
           "ldlt_preprocess: memory allocation failed for snodes\n");
           exit(1);
        }
 
-       mat[*token].xsuper = (int*)malloc((neqns+1)*sizeof(int)); 
+       mat[*token].xsuper = (int*)malloc((neqns+1)*sizeof(int));
        if (!mat[*token].xsuper) {
           fprintf(stderr,
           "ldlt_preprecess: memory allocation failed for xsuper\n");
@@ -304,24 +304,24 @@ void ldlt_preprocess__(int *token, int *n,    int *colptr,
           fprintf(stderr,
           "ldlt_preprocess: memory allocation failed for colcnt\n");
           exit(1);
-       } 
+       }
 
        mat[*token].perm = (int*)malloc(neqns*sizeof(int));
        if (!mat[*token].perm) {
-          fprintf(stderr, 
+          fprintf(stderr,
           "ldlt_preprocess: memory allocation failed for perm\n");
           exit(1);
        }
 
        mat[*token].invp = (int*)malloc(neqns*sizeof(int));
        if (!mat[*token].invp) {
-          fprintf(stderr, 
+          fprintf(stderr,
           "ldlt_preprocess: memory allocation failed for invp\n");
           exit(1);
        }
 
 #ifdef TIMING
-       t0 = getime(); 
+       t0 = getime();
 #endif
 
 #ifdef METIS
@@ -335,10 +335,10 @@ void ldlt_preprocess__(int *token, int *n,    int *colptr,
              ------------------------ */
 
           ordmmd_(&logfil,            &neqns,             xadj2,
-                  adj2,               mat[*token].invp,   mat[*token].perm, 
-                  &iwsiz,             mat[*token].iwork,  &mat[*token].nnzl, 
+                  adj2,               mat[*token].invp,   mat[*token].perm,
+                  &iwsiz,             mat[*token].iwork,  &mat[*token].nnzl,
                   &mat[*token].nsub,  mat[*token].colcnt, &mat[*token].nsuper,
-                  mat[*token].xsuper, mat[*token].snodes, &sfiflg, 
+                  mat[*token].xsuper, mat[*token].snodes, &sfiflg,
                   &iflag);
 
        }
@@ -356,7 +356,7 @@ void ldlt_preprocess__(int *token, int *n,    int *colptr,
        else if (*order == 2) {
 
           /* ----------------------
-             Node Nested Dissection 
+             Node Nested Dissection
              ---------------------- */
 
           numflag = 1;
@@ -370,9 +370,9 @@ void ldlt_preprocess__(int *token, int *n,    int *colptr,
             options[6] = 0;
             options[7] = 1;
           */
-  
-          METIS_NodeND(n,                 xadj2,   adj2, 
-                       &numflag,          options, mat[*token].perm, 
+
+          METIS_NodeND(n,                 xadj2,   adj2,
+                       &numflag,          options, mat[*token].perm,
                        mat[*token].invp);
        }
        else if (*order == 3) {
@@ -382,7 +382,7 @@ void ldlt_preprocess__(int *token, int *n,    int *colptr,
           numflag = 1;
           options[0] = 0;
           METIS_EdgeND(n,                 xadj2,    adj2,
-                       &numflag,          options,  mat[*token].perm, 
+                       &numflag,          options,  mat[*token].perm,
                        mat[*token].invp);
        }
 #endif
@@ -395,12 +395,12 @@ void ldlt_preprocess__(int *token, int *n,    int *colptr,
        }
        free(xadj2);
        free(adj2);
-     
+
 #ifdef TIMING
        t1 = getime();
        t1 = t1 - t0;
        printf("\n");
- 
+
        if (*order < 0 || *order > 4) {
           printf(" MMD   :");
        }
@@ -426,10 +426,10 @@ void ldlt_preprocess__(int *token, int *n,    int *colptr,
 #endif
 
 #ifdef TIMING
-       t0 = getime(); 
+       t0 = getime();
 #endif
        /* ----------------------
-          Symbolic factorization 
+          Symbolic factorization
           ---------------------- */
        if (*order >= 0 && *order <= 3) {
           /* not needed when MMD has been called */
@@ -438,8 +438,8 @@ void ldlt_preprocess__(int *token, int *n,    int *colptr,
 //printf("before sfinit:\n");
 //for (i=0;i<neqns;i++) printf("perm(%d) = %d\n", i+1, mat[*token].perm[i]);
 
-          sfinit_(&logfil,              &neqns,        
-                  &nnza,                mat[*token].xadj, 
+          sfinit_(&logfil,              &neqns,
+                  &nnza,                mat[*token].xadj,
                   mat[*token].adj,      mat[*token].perm,
                   mat[*token].invp,     mat[*token].colcnt,
                   &mat[*token].nnzl,    &mat[*token].nsub,
@@ -463,39 +463,39 @@ void ldlt_preprocess__(int *token, int *n,    int *colptr,
        }
 
        mat[*token].lindx = (int*)malloc(nsub*sizeof(int));
-       if (!mat[*token].lindx) { 
+       if (!mat[*token].lindx) {
           fprintf(stderr,
           "ldlt_preprocess: memory allocation failed for lindx\n");
           exit(1);
-       } 
+       }
 
        mat[*token].xlnz = (int*)malloc((neqns+1)*sizeof(int));
        if (!mat[*token].xlnz) {
           fprintf(stderr,
-          "ldlt_preprocess: memory allocation failed for xlnz\n"); 
+          "ldlt_preprocess: memory allocation failed for xlnz\n");
           exit(1);
        }
 
        for (i=0; i<iwsiz; i++) mat[*token].iwork[i]=0;
 
        symfct_(&logfil,              &neqns,
-               &nnza,                mat[*token].xadj, 
+               &nnza,                mat[*token].xadj,
                mat[*token].adj,      mat[*token].perm,
                mat[*token].invp,     mat[*token].colcnt,
                &mat[*token].nsuper,  mat[*token].xsuper,
-               mat[*token].snodes,   &mat[*token].nsub, 
+               mat[*token].snodes,   &mat[*token].nsub,
                mat[*token].xlindx,   mat[*token].lindx,
                mat[*token].xlnz,     &iwsiz,
                mat[*token].iwork,    &iflag);
 
 #ifdef TIMING
-       t1 = getime(); 
+       t1 = getime();
        t1 = t1 - t0;
        printf(" TIME FOR SYMBOLIC FACTORIZATION      = %9.3e\n\n", t1);
 #endif
 
        /* ---------------------------
-          Prepare for Numerical factorization 
+          Prepare for Numerical factorization
           and triangular solve.
           --------------------------- */
 
@@ -507,9 +507,9 @@ void ldlt_preprocess__(int *token, int *n,    int *colptr,
        }
 
 
-       bfinit_(&neqns,             &nsuper, 
-               mat[*token].xsuper, mat[*token].snodes, 
-               mat[*token].xlindx, mat[*token].lindx,  
+       bfinit_(&neqns,             &nsuper,
+               mat[*token].xsuper, mat[*token].snodes,
+               mat[*token].xlindx, mat[*token].lindx,
                &cachsz,            &mat[*token].tmpsiz,
                mat[*token].split);
        ierr = 0;
@@ -535,17 +535,17 @@ void ldlt_preprocess__(int *token, int *n,    int *colptr,
     iwsiz  = 7*neqns+3;
 
 #ifdef TIMING
-    t0 = getime(); 
+    t0 = getime();
 #endif
     if (mat[*token].anz == NULL) {
       mat[*token].anz = (double*)malloc((2*nnz-neqns)*sizeof(double));
       if (!mat[*token].anz) {
          fprintf(stderr,"memory allocation failed for anz\n");
          exit(1);
-      } 
+      }
     }
 
-    /* Aug 30, 2008, allocate extra space for diagal extraction 
+    /* Aug 30, 2008, allocate extra space for diagal extraction
        the extra space is not used in the LDLT factorization */
     maxsup = 0;
     *nnzlplus = nnzl;
@@ -553,7 +553,7 @@ void ldlt_preprocess__(int *token, int *n,    int *colptr,
        supsize = mat[*token].xsuper[jsup+1]-mat[*token].xsuper[jsup];
        if (supsize > maxsup) maxsup = supsize;
        *nnzlplus =* nnzlplus + supsize*(supsize-1)/2;
-    } 
+    }
     /* printf(" nnzlplus = %d\n", nnzlplus); */
 
     if (mat[*token].lnz == NULL) {
@@ -571,8 +571,8 @@ void ldlt_preprocess__(int *token, int *n,    int *colptr,
           exit(1);
        }
     }
-  
-    if (mat[*token].diag == NULL) {  
+
+    if (mat[*token].diag == NULL) {
        mat[*token].diag = (double*)malloc(neqns*sizeof(double));
        if (!mat[*token].diag) {
           fprintf(stderr,"memory allocation failed for diag.\n");
@@ -595,24 +595,24 @@ void ldlt_preprocess__(int *token, int *n,    int *colptr,
        for (i=0; i<nnz; i++) mat[*token].anz[i] = nzvals[i];
     }
     else {
-       flo2ho_(&neqns,             colptr,           rowind,   
-               nzvals,             mat[*token].xadj, mat[*token].adj, 
+       flo2ho_(&neqns,             colptr,           rowind,
+               nzvals,             mat[*token].xadj, mat[*token].adj,
                mat[*token].anz,    mat[*token].iwork);
     }
 
     inpnv_(&logfil,            &neqns,              mat[*token].xadj,
-           mat[*token].adj,    mat[*token].anz,     mat[*token].perm,   
+           mat[*token].adj,    mat[*token].anz,     mat[*token].perm,
            mat[*token].invp,   &mat[*token].nsuper, mat[*token].xsuper,
            mat[*token].xlindx, mat[*token].lindx,   mat[*token].xlnz,
            mat[*token].lnz,    &iwsiz,              mat[*token].iwork,
            &iflag);
 
-   
+
     for (i=0; i<tmpsiz; i++) mat[*token].tmat[i] = 0.0;
 
-    blkfct_(&logfil,            &neqns, 
+    blkfct_(&logfil,            &neqns,
             &nsuper,            &nunroll,
-            mat[*token].xsuper, mat[*token].snodes, 
+            mat[*token].xsuper, mat[*token].snodes,
             mat[*token].split,  mat[*token].xlindx,
             mat[*token].lindx,  mat[*token].xlnz,
             mat[*token].lnz,    mat[*token].diag,
@@ -638,9 +638,9 @@ void ldlt_solve__(int *token, double *x, double *rhs)
     perm   = mat[*token].perm;
     invp   = mat[*token].invp;
     newrhs = mat[*token].newrhs;
-   
+
     for (i=0; i<neqns; i++) newrhs[i] = rhs[perm[i]-1];
- 
+
     blkslv_(&nsuper,              mat[*token].xsuper,   mat[*token].xlindx,
             mat[*token].lindx,    mat[*token].xlnz,   mat[*token].lnz,
             mat[*token].newrhs);
@@ -681,19 +681,19 @@ void ldlt_getdiag__(int *token, double *diag)
     ytemp = (double*)calloc(neqns,sizeof(double));
     selinv_(&nsuper,            mat[*token].xsuper,  mat[*token].xlindx,
                mat[*token].lindx,  mat[*token].xlnz  ,  mat[*token].lnz   ,
-               mat[*token].snodes, diag              ,  mat[*token].perm  , 
+               mat[*token].snodes, diag              ,  mat[*token].perm  ,
                &neqns            , dumpL);
 
-     
+
 ///////////////////////////////////////////////////////////////////////
     int * xsuper = mat[*token].xsuper;
     int * xlindx =  mat[*token].xlindx;
     int * lindx =  mat[*token].lindx;
     int * xlnz = mat[*token].xlnz;
     double * lnz =  mat[*token].lnz;
-    int fjcol, ljcol, ixstrt, ixstop, ipnt, jpnt, ix; 
+    int fjcol, ljcol, ixstrt, ixstop, ipnt, jpnt, ix;
     int jsup, jcol;
-  
+
     //int *  Row =(int *) malloc(nnzl*sizeof(int));
     //int *  Col =(int *) malloc(nnzl*sizeof(int));
     //double * LNZ = (double *)malloc(nnzl*sizeof(double));
@@ -704,7 +704,7 @@ void ldlt_getdiag__(int *token, double *diag)
       fjcol = xsuper[0];
 //loop for all supernodes
       for( jsup = 0;jsup < nsuper;jsup++)
-      { 
+      {
 	//last column of each supernode
 	 ljcol = xsuper[jsup+1] - 1;
          ixstrt = xlnz[fjcol-1];
@@ -734,7 +734,7 @@ void ldlt_diaginv__(int *token, double *dinv)
 {
     double *ywork;
     int    *mark, *nzidx;
-    int    neqns, nsuper; 
+    int    neqns, nsuper;
 
     neqns = mat[*token].n;
     nsuper = mat[*token].nsuper;

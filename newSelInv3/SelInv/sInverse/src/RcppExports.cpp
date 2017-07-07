@@ -5,9 +5,9 @@
 
 using namespace Rcpp;
 
-// selinv2julia
-int selinv2julia(int nnodes, int nnz, IntegerVector colptr_, IntegerVector rowind_, NumericVector nzval_);
-RcppExport SEXP sInverse_selinv2julia(SEXP nnodesSEXP, SEXP nnzSEXP, SEXP colptr_SEXP, SEXP rowind_SEXP, SEXP nzval_SEXP) {
+// selinv2r
+NumericVector selinv2r(int nnodes, int nnz, IntegerVector colptr_, IntegerVector rowind_, NumericVector nzval_);
+RcppExport SEXP sInverse_selinv2r(SEXP nnodesSEXP, SEXP nnzSEXP, SEXP colptr_SEXP, SEXP rowind_SEXP, SEXP nzval_SEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -16,7 +16,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< IntegerVector >::type colptr_(colptr_SEXP);
     Rcpp::traits::input_parameter< IntegerVector >::type rowind_(rowind_SEXP);
     Rcpp::traits::input_parameter< NumericVector >::type nzval_(nzval_SEXP);
-    rcpp_result_gen = Rcpp::wrap(selinv2julia(nnodes, nnz, colptr_, rowind_, nzval_));
+    rcpp_result_gen = Rcpp::wrap(selinv2r(nnodes, nnz, colptr_, rowind_, nzval_));
     return rcpp_result_gen;
 END_RCPP
 }

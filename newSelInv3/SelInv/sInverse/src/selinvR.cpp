@@ -15,11 +15,11 @@ using namespace Rcpp;
 #define diag(i)   diag[(i)-1]
 #define diag2(i)  diag2[(i)-1]
 
-extern void ldlt_preprocess__(int *, int *, int *, int *, int *, int *, int *);
-extern void ldlt_fact__(int *, int *, int *, double *,int*);
-extern int ldlt_solve__(int *, double *, double *);
-extern int ldlt_free__(int *);
-extern int ldlt_selinv__(int *, double *, int*,double*,int*,
+extern "C" void ldlt_preprocess__(int *, int *, int *, int *, int *, int *, int *);
+extern "C" void ldlt_fact__(int *, int *, int *, double *,int*);
+extern "C" void ldlt_solve__(int *, double *, double *);
+extern "C" void ldlt_free__(int *);
+extern "C" void ldlt_selinv__(int *, double *, int*,double*,int*,
                          int*,int*,int, double*, double*);
 
 #ifdef TIMING
@@ -33,7 +33,7 @@ extern double getime(void);
 // rowind_, row index
 
 // [[Rcpp::export]]
-int selinv2julia(int nnodes, int nnz,
+NumericVector selinv2r(int nnodes, int nnz,
                  IntegerVector colptr_, IntegerVector rowind_,
                  NumericVector nzval_)
 {
@@ -70,7 +70,9 @@ int selinv2julia(int nnodes, int nnz,
     for(i=0;i<nnodes;i++){
         perm[i]=i+1;
     }
-    ldlt_preprocess__(&token, &nnodes, colptr, rowind, &Lnnz, &order, perm);
+    int nndess = nnodes;
+    ldlt_preprocess__(&token, &nndess, colptr, rowind, &Lnnz, &order, perm);
+    return nzval_;
 
     ldlt_fact__(&token, colptr, rowind, nzvals, nnzlplus);
 
@@ -116,5 +118,5 @@ int selinv2julia(int nnodes, int nnz,
     LnnzOutput = Lnnz;
 
 
-    return 0;
+    return diagOutput;
 }
