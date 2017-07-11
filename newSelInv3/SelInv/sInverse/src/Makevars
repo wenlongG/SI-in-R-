@@ -1,0 +1,2 @@
+PKG_CXXFLAGS = -llapack -lblas -lm
+PKG_LIBS = -llapack -lblas -lm

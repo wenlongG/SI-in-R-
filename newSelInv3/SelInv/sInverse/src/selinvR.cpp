@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <time.h>
 #include <Rcpp.h>
+#include <iostream>
 using namespace Rcpp;
 
 #define nzvals(i) nzvals[(i)-1]
@@ -50,14 +51,12 @@ NumericVector selinv2r(int nnodes, int nnz,
     for(int i=0; i<nzval_.size(); i++)
         nzvals[i] = nzval_[i];
 
-
     int* nnzlplus;
     nnzlplus = (int*) malloc(sizeof(int));
     double* LDL_D;
     LDL_D = (double*) malloc(nnodes*sizeof(double));
     int* permout;
     permout = (int*) malloc(nnodes*sizeof(int));
-
 
     int i;
     int *perm;
@@ -72,14 +71,15 @@ NumericVector selinv2r(int nnodes, int nnz,
     }
     int nndess = nnodes;
     ldlt_preprocess__(&token, &nndess, colptr, rowind, &Lnnz, &order, perm);
-    return nzval_;
+
 
     ldlt_fact__(&token, colptr, rowind, nzvals, nnzlplus);
+    printf("%d\n",nnzlplus[0]);
 
     double *LNZXX, *LDL_L;
     int *RowXX,*ColXX;
     double *V;
-    int dumpL=1;
+    int dumpL=0;
 
     RowXX =(int *) malloc(Lnnz*sizeof(int));
     ColXX =(int *) malloc(Lnnz*sizeof(int));
@@ -89,34 +89,38 @@ NumericVector selinv2r(int nnodes, int nnz,
 
     V=(double*)calloc(3*Lnnz+*nnzlplus,sizeof(double));
     /* selected inversion */
-    diag2 = (double*)calloc(nnodes,sizeof(double));
+    diag2 = (double*)calloc(nndess,sizeof(double));
     ldlt_selinv__(&token, diag2, &dumpL, LNZXX, RowXX, ColXX,
                   permout,*nnzlplus,LDL_L,LDL_D);
 
     int LnnzOutput;
-    NumericVector diagOutput(nnodes);
+    NumericVector diagOutput(nndess);
+    for(i=0;i<nnodes;i++){
+        diagOutput[i] = diag2[i];
+    }
 
-
+    IntegerVector rowOutput(Lnnz), colOutput(Lnnz);
+    NumericVector valOutput(Lnnz);
     for(i=0;i<Lnnz;i++)
     {
-        V[i] = (double) RowXX[i];
-        V[i+Lnnz] = (double) ColXX[i];
-        V[i+2*Lnnz] = LDL_L[i];
-    }
-    for (i=0;i<*nnzlplus;i++){
-        V[i+3*Lnnz] = LNZXX[i];
+        rowOutput[i] = permout[RowXX[i]-1];
+        colOutput[i] = permout[ColXX[i]-1];
+        valOutput[i] = LDL_L[i];
     }
 
+    NumericVector outputLNZ(*nnzlplus);
+    for (i=0;i<*nnzlplus;i++){
+        outputLNZ[i] = LNZXX[i];
+    }
 
     ldlt_free__(&token);
 
     if (order == 0) free(perm);
-    free(diag2);
 
-    for(i=0;i<nnodes;i++)
-        diagOutput[i] = diag2[i];
     LnnzOutput = Lnnz;
 
+    free(diag2);
 
-    return diagOutput;
+
+    return outputLNZ;
 }

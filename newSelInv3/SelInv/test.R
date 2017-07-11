@@ -4,7 +4,7 @@
 library(sInverse)
 library(SparseM)
 ## create sample matrix to test
-B = diag(1,8)
+B = diag(8,8)
 B[2,1] = 1
 B[1,2] = 1
 B[3,2] = 1
@@ -13,10 +13,10 @@ B[5,1] = 1
 B[6,2] = 1
 B[1,5] = 1
 B[2,6] = 1
-testM = B*4
+testM = B
 testM = as.matrix.csr(testM)
-colptr = testM@ja
-rowind = testM@ia
+colptr = testM@ia
+rowind = testM@ja
 nzvals = testM@ra
 nnz = length(nzvals)
 nnodes = nrow(testM)

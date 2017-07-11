@@ -5,3 +5,4 @@
 *.gz
 *.Rhistory
 .DS_Store
+*.M

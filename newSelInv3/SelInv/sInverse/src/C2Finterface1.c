@@ -600,12 +600,16 @@ void ldlt_preprocess__(int *token, int *n,    int *colptr,
                mat[*token].anz,    mat[*token].iwork);
     }
 
+
+
     inpnv_(&logfil,            &neqns,              mat[*token].xadj,
            mat[*token].adj,    mat[*token].anz,     mat[*token].perm,
            mat[*token].invp,   &mat[*token].nsuper, mat[*token].xsuper,
            mat[*token].xlindx, mat[*token].lindx,   mat[*token].xlnz,
            mat[*token].lnz,    &iwsiz,              mat[*token].iwork,
            &iflag);
+
+
 
 
     for (i=0; i<tmpsiz; i++) mat[*token].tmat[i] = 0.0;
@@ -684,7 +688,6 @@ void ldlt_getdiag__(int *token, double *diag)
                mat[*token].snodes, diag              ,  mat[*token].perm  ,
                &neqns            , dumpL);
 
-
 ///////////////////////////////////////////////////////////////////////
     int * xsuper = mat[*token].xsuper;
     int * xlindx =  mat[*token].xlindx;
@@ -698,8 +701,9 @@ void ldlt_getdiag__(int *token, double *diag)
     //int *  Col =(int *) malloc(nnzl*sizeof(int));
     //double * LNZ = (double *)malloc(nnzl*sizeof(double));
 
-    for(i=0;i<nnzlplus;i++)
-      LNZ[i] = lnz[i];
+    for(i=0;i<nnzlplus;i++){
+        LNZ[i] = lnz[i];
+    }
 //starting column of the first supernode
       fjcol = xsuper[0];
 //loop for all supernodes

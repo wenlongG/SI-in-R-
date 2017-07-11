@@ -26,7 +26,7 @@ extern int readmatrix_(char *, int *, int *, double *);
 extern double getime(void);
 #endif
 
-double* selinv2julia(int nnodes, int nnz, int *colptr, int *rowind, 
+double* selinv2julia(int nnodes, int nnz, int *colptr, int *rowind,
 		      double* nzvals, int* LnnzOutput,int* permout,int *nnzlplus,
 		      double* diagOutput, double* LDL_D)
 {
@@ -37,7 +37,7 @@ double* selinv2julia(int nnodes, int nnz, int *colptr, int *rowind,
    double *rhs, *xsol, *diag2;
    int token, order=0;
    int Lnnz;
-   double t0,t1, errmax; 
+   double t0,t1, errmax;
    long myclktck;
    double dval;
    double errabs;
@@ -48,7 +48,7 @@ double* selinv2julia(int nnodes, int nnz, int *colptr, int *rowind,
    //nnz = 0;
 
    //   char filename[120]="/home/grad/wgong/Downloads/newSelInv/SelInv/UTILITIES/bcsstk14.ccf";
-   
+
 
    //   readmatrixheader_(filename, &nnodes, &nnz);
 
@@ -63,10 +63,14 @@ double* selinv2julia(int nnodes, int nnz, int *colptr, int *rowind,
    for(i=0;i<nnodes;i++){
      perm[i]=i+1;
    }
-   ldlt_preprocess__(&token, &nnodes, colptr, rowind, &Lnnz, &order, perm);   
+   ldlt_preprocess__(&token, &nnodes, colptr, rowind, &Lnnz, &order, perm);
+   for(i=0;i<nnodes;i++){
+       printf("%d\n",perm[i]);
+   }
+
    //printf(" NUMBER OF ROWS IN A = %d\n", nnodes);
    //printf(" NUMBER OF NONZERO ELEMENTS IN A = %d\n" , nnz);
-   //printf(" NUMBER OF NONZERO ELEMENTS IN L = %d\n\n", Lnnz); 
+   //printf(" NUMBER OF NONZERO ELEMENTS IN L = %d\n\n", Lnnz);
 
    ldlt_fact__(&token, colptr, rowind, nzvals,nnzlplus);
 
@@ -79,7 +83,7 @@ double* selinv2julia(int nnodes, int nnz, int *colptr, int *rowind,
     ColXX =(int *) malloc(Lnnz*sizeof(int));
     LDL_L =(double *) malloc(Lnnz*sizeof(double));
     LNZXX = (double *)malloc(*nnzlplus*sizeof(double));
-   
+
 
    V=(double*)calloc(3*Lnnz+*nnzlplus,sizeof(double));
    /* selected inversion */
@@ -97,22 +101,25 @@ double* selinv2julia(int nnodes, int nnz, int *colptr, int *rowind,
      }
    for (i=0;i<*nnzlplus;i++){
      V[i+3*Lnnz] = LNZXX[i];
+       printf("%f\n", LNZXX[i]);
    }
 
-   for(i=0;i<nnodes;i++)
+   for(i=0;i<nnodes;i++){
        diagOutput[i] = diag2[i];
+
+   }
 
    LnnzOutput[0] = Lnnz;
 
-   ldlt_free__(&token); 
+   ldlt_free__(&token);
 
    if (order == 0) free(perm);
-   //free(colptr); 
-   //free(rowind); 
-   //free(nzvals); 
-   //free(rhs); 
-   //free(xsol); 
-   free(diag2); 
+   //free(colptr);
+   //free(rowind);
+   //free(nzvals);
+   //free(rhs);
+   //free(xsol);
+   free(diag2);
 
    return V;
 }
